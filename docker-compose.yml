@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: arm64v8/mysql:5.5.62
+    container_name: vulnerable_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: password123
+    volumes:
+      - ./mysql-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - wordpress_net
+    command: --bind-address=0.0.0.0 --skip-name-resolve
+
+  wordpress:
+    image: arm64v8/wordpress:4.6-php5.6-apache
+    container_name: vulnerable_wordpress
+    depends_on:
+      - mysql
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: password123
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 'true'
+    volumes:
+      - ./wordpress-config.php:/var/www/html/wp-config-extra.php
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    networks:
+      wordpress_net:
+        ipv4_address: 172.17.0.2
+    ports:
+      - "172.17.0.1:8081:80"
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+
+networks:
+  wordpress_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.17.0.0/16
