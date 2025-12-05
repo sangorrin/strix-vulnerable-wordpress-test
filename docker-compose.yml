@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mysql:
-    image: arm64v8/mysql:5.5.62
+    image: mysql:5.5.62
     container_name: vulnerable_mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -16,7 +16,7 @@ services:
     command: --bind-address=0.0.0.0 --skip-name-resolve
 
   wordpress:
-    image: arm64v8/wordpress:4.6-php5.6-apache
+    image: wordpress:4.6-php5.6-apache
     container_name: vulnerable_wordpress
     depends_on:
       - mysql
